@@ -21,7 +21,7 @@ class ReLU(Activation):
 
     def __call__(self, inputs):
         inputs = np.array(inputs)
-        return np.max(0, inputs)
+        return np.maximum(np.zeros(shape=np.shape(inputs)),inputs)
 
 
 class Sigmoid(Activation):
@@ -56,7 +56,6 @@ class LeakyReLU(Activation):
             for i in range(len(inputs)):
                 if (inputs[i] < 0):
                     inputs[i] = inputs[i] * self.alpha
-
             return inputs
 
         return None
