@@ -1,5 +1,5 @@
 import numpy as np
-from initializers.initializers import Zeros, RandomNormal, Random
+from initializers import Zeros, RandomNormal, Random, XavierNormal
 from activations.activations import LeakyReLU
 
 def der_relu(inputs):
@@ -19,7 +19,7 @@ def get_mse_loss(outputs,targets):
     return 0.5*(1/len(outputs))*np.sum(np.square(targets-outputs))
 
 initializer = Zeros()
-initializer_w = RandomNormal(mean=0, std_dev=0.02)
+initializer_w = XavierNormal()
 activation = LeakyReLU(0.01)
 learning_rate = 0.1
 inputs = np.array([[x] for x in range(1,33)])
@@ -35,13 +35,13 @@ prev_shape = inputs.shape[1]
 
 for units in layers_units:
     weight = initializer_w(prev_shape,units)
-    bias = initializer(units)
+    bias = initializer(1,units)
     prev_shape = units
     weights.append(weight)
     biases.append(bias)
 
 losses = []
-for _ in range(200):
+for _ in range(2000):
     #forward pass
     outputs = []
     prev_output = inputs
