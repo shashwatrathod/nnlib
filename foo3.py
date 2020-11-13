@@ -1,6 +1,6 @@
 import numpy as np
 from initializers import Zeros, RandomNormal, Random, XavierNormal
-from activations.activations import LeakyReLU
+from activations.activations import ReLU, LeakyReLU
 
 def der_relu(inputs):
     op = np.zeros(shape=np.shape(inputs))
@@ -9,8 +9,9 @@ def der_relu(inputs):
             if inputs[i][j] > 0:
                 op[i][j] = 1
             else:
-                op[i][j] = 0.01 * inputs[i][j]
+                op[i][j] = 0.01
     return np.array(op)
+
 
 def der_mse(output,targets):
     return output - targets
@@ -21,14 +22,15 @@ def get_mse_loss(outputs,targets):
 initializer = Zeros()
 initializer_w = XavierNormal()
 activation = LeakyReLU(0.01)
-learning_rate = 0.1
+# activation = ReLU()
+learning_rate = 0.2
 inputs = np.array([[x] for x in range(1,33)])
 m_input = max(inputs)[0]
-targets = np.array([[0.4*x[0] + 5*x[0] + 7.3] for x in inputs])
+targets = np.array([[5*x[0] + 0.2*x[0] + 6.9] for x in inputs])
 m_target = max(targets)[0]
 inputs = inputs/m_input
 targets = targets/m_target
-layers_units = np.array([4,5,1])
+layers_units = np.array([4,5,3,1])
 weights = []
 biases = []
 prev_shape = inputs.shape[1]
@@ -41,12 +43,12 @@ for units in layers_units:
     biases.append(bias)
 
 losses = []
-for _ in range(2000):
+for _ in range(1000):
     #forward pass
     outputs = []
     prev_output = inputs
     for i in range(len(weights)):
-        output = activation(np.dot(prev_output,weights[i])+biases[i])
+        _,output = activation(np.dot(prev_output,weights[i])+biases[i])
         prev_output = output
         outputs.append(output)
 
@@ -57,15 +59,15 @@ for _ in range(2000):
     for i in reversed(range(len(weights))):
         if(i==(len(weights)-1)):
             t1 = der_mse(outputs[-1],targets)
-            t2 = der_relu(np.dot(outputs[i-1],weights[i])+biases[i])
+            _,t2 = activation.der(np.dot(outputs[i-1],weights[i])+biases[i])
             t3 = outputs[i-1]
         else:
             t1 = np.dot(t1*t2,weights[i+1].T)
             if(i==0):
-                t2 = der_relu(np.dot(inputs,weights[i])+biases[i])
+                _,t2 = activation.der(np.dot(inputs,weights[i])+biases[i])
                 t3 = inputs
             else:
-                t2 = der_relu(np.dot(outputs[i-1],weights[i])+biases[i])
+                _,t2 = activation.der(np.dot(outputs[i-1],weights[i])+biases[i])
                 t3 = outputs[i-1]
 
         t4 = np.ones(shape=biases[i].shape)
@@ -94,7 +96,7 @@ plt.plot(inputs,targets)
 plt.subplot(133)
 prev_output = inputs
 for i in range(len(weights)):
-    output = activation(np.dot(prev_output, weights[i]) + biases[i])
+    _,output = activation(np.dot(prev_output, weights[i]) + biases[i])
     prev_output = output
 plt.plot(inputs,prev_output)
 plt.show()
